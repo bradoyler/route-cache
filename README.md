@@ -25,7 +25,7 @@ app.get('/index', routeCache.cacheSeconds(20), function(req, res){
 - tests (via mocha & supertest)
 - client-side Cache-Control
 - support for distributed caches (redis or memcache)
-- accomodate for "Dog piling" when routes logic is extra slow
+- accomodate for "Dog piling/thundering herd" when routes logic is extra slow
 
 #### License
 
