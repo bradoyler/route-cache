@@ -6,6 +6,11 @@ Simple middleware for Express route caching with a given TTL (in seconds)
 - easy to use and fork for your needs
 - works with gzip compression
 
+## Install
+```sh
+npm install route-cache
+```
+
 ## How to use
 ```javascript
 
@@ -21,14 +26,14 @@ app.get('/index', routeCache.cacheSeconds(20), function(req, res){
 
 ```
 
-### Future plans / todos
+## Future plans / todos
 - tests (via mocha & supertest)
 - client-side Cache-Control
 - support for distributed caches (redis or memcache)
 - accomodate for "Dog piling/thundering herd" when routes logic is extra slow
 
-#### License
 
+------
 The MIT License (MIT)
 
 Copyright (c) 2014 Brad Oyler
