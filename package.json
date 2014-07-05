@@ -1,0 +1,32 @@
+{
+  "name": "route-cache",
+  "version": "0.0.1",
+  "description": "express middleware for caching your routes",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bradoyler/route-cache.git"
+  },
+  "keywords": [
+    "middleware",
+    "express",
+    "cache",
+    "http-caching"
+  ],
+  "author": "Brad Oyler <bradoyler@gmail.com> (github.com/bradoyler)",
+  "license": "MIT",
+  "dependencies": {
+     "eidetic": "0.1.1"
+  },
+  "devDependencies": {
+    "mocha": "~1.10.0",
+    "express": "~4.4.5"
+  },
+  "bugs": {
+    "url": "https://github.com/bradoyler/route-cache/issues"
+  },
+  "homepage": "https://github.com/bradoyler/route-cache"
+}
