@@ -16,7 +16,7 @@ module.exports.cacheSeconds = function(ttl) {
       var send = res.send;
       res.send = function(string) {
         var body = string instanceof Buffer ? string.toString() : string;
-        cachestore.put(req.path, body, ttl);
+        cachestore.put(req.url, body, ttl);
         send.call(this, body);
       };
       next();
