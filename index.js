@@ -12,43 +12,52 @@ function RouteCache(port, host, password) {
       if (password) {
         options = {auth_pass: password};
       }
-      this.client = redis.createClient(port, host, options); 
+      this.redisClient = redis.createClient(port, host, options); 
   }
 }
 
 RouteCache.prototype.useRedis = false;
 
 RouteCache.prototype.cacheSeconds = function(seconds) {
-  if(this.useRedis) {
-    return this.getRedisCache(seconds);
-  }
-  return this.getCache(seconds);
+  return this.cache(seconds);
 };
 
-RouteCache.prototype.cachePut = function(cacheKey, body, ttl) {
+RouteCache.prototype.cacheSet = function(cacheKey, body, ttl) {
   if(this.useRedis) {
-    this.client.set(cacheKey, body);
-    this.client.expire(cacheKey, ttl);
+    this.redisClient.set(cacheKey, body);
+    this.redisClient.expire(cacheKey, ttl);
   }
   else {
     localcache.put(cacheKey, body, ttl);
   }
 };
 
-RouteCache.prototype.getRedisCache = function(ttl) {
+RouteCache.prototype.cacheGet = function(cacheKey, callback) {
+  if(this.useRedis) {
+    this.redisClient.get(cacheKey, function(err, reply) {
+        callback(err, reply);
+    });
+  }
+  else {
+    var cache = localcache.put(cacheKey, body, ttl);
+    callback(null, cache);
+  }
+};
+
+RouteCache.prototype.cache = function(ttl) {
   var self = this;
 
   return function(req, res, next) {
     var cacheKey ='route_'+ req.url;
 
-    self.client.get(cacheKey, function(err, reply) {
+    self.cacheGet(cacheKey, function(err, reply) {
       if (reply) {
         res.send(reply);
       } else {
         var send = res.send;
         res.send = function(string) {
           var body = string instanceof Buffer ? string.toString() : string;
-          self.client.cachePut(cacheKey, body, ttl);
+          self.cacheSet(cacheKey, body, ttl);
           send.call(this, body);
         };
         next();
@@ -57,25 +66,5 @@ RouteCache.prototype.getRedisCache = function(ttl) {
   };
 };
 
-RouteCache.prototype.getCache = function(ttl) {
-  var self = this;
-
-  return function(req, res, next) {
-    var cacheKey ='route_'+ req.url;
-    var cache = localcache.get(cacheKey);
-
-    if (cache) {
-      res.send(cache);
-    } else {
-      var send = res.send;
-      res.send = function(string) {
-        var body = string instanceof Buffer ? string.toString() : string;
-        self.client.cachePut(cacheKey, body, ttl);
-        send.call(this, body);
-      };
-      next();
-    }
-  };
-};
 
 module.exports = RouteCache;
