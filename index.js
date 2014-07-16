@@ -25,6 +25,16 @@ RouteCache.prototype.cacheSeconds = function(seconds) {
   return this.getCache(seconds);
 };
 
+RouteCache.prototype.cachePut = function(cacheKey, body, ttl) {
+  if(this.useRedis) {
+    this.client.set(cacheKey, body);
+    this.client.expire(cacheKey, ttl);
+  }
+  else {
+    localcache.put(cacheKey, body, ttl);
+  }
+};
+
 RouteCache.prototype.getRedisCache = function(ttl) {
   var self = this;
 
@@ -38,8 +48,7 @@ RouteCache.prototype.getRedisCache = function(ttl) {
         var send = res.send;
         res.send = function(string) {
           var body = string instanceof Buffer ? string.toString() : string;
-          self.client.set(cacheKey, body);
-          self.client.expire(cacheKey, ttl);
+          self.client.cachePut(cacheKey, body, ttl);
           send.call(this, body);
         };
         next();
@@ -61,7 +70,7 @@ RouteCache.prototype.getCache = function(ttl) {
       var send = res.send;
       res.send = function(string) {
         var body = string instanceof Buffer ? string.toString() : string;
-        localcache.put(cacheKey, body, ttl);
+        self.client.cachePut(cacheKey, body, ttl);
         send.call(this, body);
       };
       next();
