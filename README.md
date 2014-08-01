@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
+
 # Route-Cache
 Simple middleware for Express route caching with a given TTL (in seconds)
 
@@ -9,6 +11,11 @@ Simple middleware for Express route caching with a given TTL (in seconds)
 ## Install
 ```sh
 npm install route-cache
+```
+
+## Test
+```sh
+npm test
 ```
 
 ## How to use
@@ -27,11 +34,8 @@ app.get('/index', routeCache.cacheSeconds(20), function(req, res){
 ```
 
 ## Future plans / todos
-- tests (via mocha & supertest)
 - client-side Cache-Control
 - support for distributed caches (redis or memcache)
-- accomodate for "Dog piling/thundering herd" when routes logic is extra slow
-
 
 ------
 The MIT License (MIT)
