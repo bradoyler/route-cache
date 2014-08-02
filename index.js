@@ -11,7 +11,6 @@ module.exports.cacheSeconds = function(ttl) {
   return function(req, res, next) {
     var self = this;
     var cache = cachestore.get(req.path);
-    //var send = res.send;
     res.original_send = res.send;
 
     // returns the value immediately
