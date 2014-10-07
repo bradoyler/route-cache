@@ -1,6 +1,6 @@
 {
   "name": "route-cache",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "express middleware for caching your routes",
   "main": "index.js",
   "scripts": {
@@ -22,8 +22,10 @@
     "eidetic": "0.1.1"
   },
   "devDependencies": {
-    "mocha": "~1.10.0",
-    "express": "~4.4.5"
+    "mocha": "~1.13.0",
+    "express": "~4.4.5",
+    "should": "2",
+    "supertest": "0.9.2"
   },
   "bugs": {
     "url": "https://github.com/bradoyler/route-cache/issues"
