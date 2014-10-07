@@ -9,8 +9,9 @@ var queues = {};
 module.exports.cacheSeconds = function(ttl) {
 
   return function(req, res, next) {
+    var key = req.originalUrl;
     var self = this;
-    var cache = cachestore.get(req.path);
+    var cache = cachestore.get(key);
     res.original_send = res.send;
 
     // returns the value immediately
@@ -19,22 +20,22 @@ module.exports.cacheSeconds = function(ttl) {
       return;
     }
 
-    if (!queues[req.path]) {
-      queues[req.path] = [];
+    if (!queues[key]) {
+      queues[key] = [];
     }
 
     // first request will get rendered output
-    if (queues[req.path].length === 0
-      && queues[req.path].push(function noop(){})) {
+    if (queues[key].length === 0
+      && queues[key].push(function noop(){})) {
 
       res.send = function (string) {
         var body = string instanceof Buffer ? string.toString() : string;
-        cachestore.put(req.url, body, ttl);
+        cachestore.put(key, body, ttl);
         
         // drain the queue so anyone else waiting for
         // this value will get their responses.
         var subscriber = null;
-        while (subscriber = queues[req.path].shift()) {
+        while (subscriber = queues[key].shift()) {
           if (subscriber) {
             process.nextTick(subscriber);
           }
@@ -45,8 +46,8 @@ module.exports.cacheSeconds = function(ttl) {
       next();
     // subsequent requests will batch while the first computes
     } else {
-      queues[req.path].push(function() {
-        var body = cachestore.get(req.path);
+      queues[key].push(function() {
+        var body = cachestore.get(key);
         res.send(body);
       });
     }
