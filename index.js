@@ -9,7 +9,7 @@ var queues = {};
 module.exports.cacheSeconds = function(ttl) {
 
   return function(req, res, next) {
-    var key = req.baseUrl + req.path;
+    var key = req.originalUrl;
     var self = this;
     var cache = cachestore.get(key);
     //var send = res.send;
