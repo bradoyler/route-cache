@@ -3,6 +3,8 @@
 # Route-Cache
 Simple middleware for Express route caching with a given TTL (in seconds)
 
+Make your routes do this ->![dodging](http://gifs.gifbin.com/1234778873_Muhammad_Ali_dodging_punches.gif)
+
 ## Why?
 - makes hard-working routes super-fast, under heavy-load
 - easy to use and fork for your needs
