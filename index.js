@@ -1,19 +1,22 @@
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-var Eidetic = require('eidetic');
-
+var LRU = require('lru-cache');
 var queues = {};
 
-function RouteCache(cachestore) {
+function RouteCache(ttl, cachestore) {
   if(!cachestore) {
-    cachestore = new Eidetic({maxSize: 50, canPutWhenFull: true});
+    var options = { max:500};
+    if(ttl){
+      options.maxAge = ttl * 1000;
+    }
+    cachestore = LRU(options);
   }
   this.cachestore = cachestore;
 }
 
 util.inherits(RouteCache, EventEmitter);
 
-RouteCache.prototype.cacheSeconds = function(ttl) {
+RouteCache.prototype.cache = function() {
 
   var self = this;
 
@@ -39,10 +42,9 @@ RouteCache.prototype.cacheSeconds = function(ttl) {
 
       res.send = function (string) {
         var body = string instanceof Buffer ? string.toString() : string;
-        self.cachestore.put(key, body, ttl);
+        self.cachestore.set(key, body);
         self.emit('cache.set', key);
-        // drain the queue so anyone else waiting for
-        // this value will get their responses.
+        // drain the queue so anyone else waiting for this value, will get their responses.
         var subscriber = null;
         while (subscriber = queues[key].shift()) {
           if (subscriber) {
