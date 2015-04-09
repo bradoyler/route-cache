@@ -10,7 +10,6 @@ module.exports.cacheSeconds = function(ttl) {
 
   return function(req, res, next) {
     var key = req.originalUrl;
-    var self = this;
     var cache = cachestore.get(key);
     res.original_send = res.send;
 
@@ -30,7 +29,7 @@ module.exports.cacheSeconds = function(ttl) {
 
       res.send = function (string) {
         var body = string instanceof Buffer ? string.toString() : string;
-        cachestore.put(key, body, ttl);
+        if (res.statusCode < 400) cachestore.put(key, body, ttl);
         
         // drain the queue so anyone else waiting for
         // this value will get their responses.
