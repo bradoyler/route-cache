@@ -1,5 +1,5 @@
 var Eidetic = require('eidetic');
-var cachestore = new Eidetic({
+var cacheStore = new Eidetic({
   maxSize: 50,
   canPutWhenFull: true
 });
@@ -10,7 +10,7 @@ module.exports.cacheSeconds = function(ttl) {
 
   return function(req, res, next) {
     var key = req.originalUrl;
-    var cache = cachestore.get(key);
+    var cache = cacheStore.get(key);
     res.original_send = res.send;
 
     // returns the value immediately
@@ -29,7 +29,7 @@ module.exports.cacheSeconds = function(ttl) {
 
       res.send = function (string) {
         var body = string instanceof Buffer ? string.toString() : string;
-        if (res.statusCode < 400) cachestore.put(key, body, ttl);
+        if (res.statusCode < 400) cacheStore.put(key, body, ttl);
         
         // drain the queue so anyone else waiting for
         // this value will get their responses.
@@ -46,7 +46,7 @@ module.exports.cacheSeconds = function(ttl) {
     // subsequent requests will batch while the first computes
     } else {
       queues[key].push(function() {
-        var body = cachestore.get(key);
+        var body = cacheStore.get(key);
         res.send(body);
       });
     }
@@ -54,3 +54,5 @@ module.exports.cacheSeconds = function(ttl) {
   }
 
 };
+
+module.exports.cacheStore = cacheStore;
