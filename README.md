@@ -1,7 +1,9 @@
-[![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
-
 # Route-Cache
 Simple middleware for Express route caching with a given TTL (in seconds)
+
+[![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
+
+[![NPM](https://nodei.co/npm/route-cache.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/route-cache/)
 
 Make your routes do this ->![dodging](http://gifs.gifbin.com/1234778873_Muhammad_Ali_dodging_punches.gif)
 
