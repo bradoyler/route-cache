@@ -37,6 +37,11 @@ app.get('/index', routeCache.cacheSeconds(20), function(req, res){
 
 ```
 
+## Delete a cached route
+```javascript
+routeCache.removeCache('/index');
+```
+
 ## Future plans / todos
 - client-side Cache-Control
 - support for distributed caches (redis or memcache)

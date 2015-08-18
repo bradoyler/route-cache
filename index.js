@@ -67,4 +67,12 @@ module.exports.cacheSeconds = function(ttl) {
 
 };
 
+
+module.exports.removeCache = function(url) {
+  if (redirects[url]) 
+    delete redirects[url];
+  cacheStore.del(url);
+};
+
+
 module.exports.cacheStore = cacheStore;
