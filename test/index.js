@@ -6,12 +6,13 @@ var request = require('supertest'),
 
  var app = express(); 
  var testindex = 0;
+ var testindexRemove = 0;
 
 describe('# RouteCache middleware test', function(){
   var app = express();
 
   app.get('/hello', routeCache.cacheSeconds(1), function(req, res){
-  	 testindex++;
+     testindex++;
      res.send('Hello ' + testindex)
   });
 
@@ -21,6 +22,11 @@ describe('# RouteCache middleware test', function(){
 
   app.get('/redirect-to-hello', routeCache.cacheSeconds(1), function(req, res) {
     res.redirect('/hello');
+  });
+
+  app.get('/hello-remove', routeCache.cacheSeconds(3600), function(req, res){
+    testindexRemove++;
+    res.send('Hello remove ' + testindexRemove)
   });
 
   var agent = request.agent(app);
@@ -56,10 +62,10 @@ describe('# RouteCache middleware test', function(){
   });
 
   it('GET #6 ~ delayed: Hello 2', function(done){
-  	setTimeout(function() {
-	    agent
-	    .get('/hello')
-	    .expect('Hello 2', done);
+    setTimeout(function() {
+      agent
+      .get('/hello')
+      .expect('Hello 2', done);
     }, 1200);
   });
 
@@ -74,5 +80,28 @@ describe('# RouteCache middleware test', function(){
         done();
       });
     })
-  })
+  });
+
+
+  it('GET #8: test removeCache', function(done){
+    agent
+    .get('/hello-remove')
+    .expect('Hello remove 1').end(function(req, res){
+
+      setTimeout(function() {
+        agent
+        .get('/hello-remove')
+        .expect('Hello remove 1').end(function(req, res){
+
+          routeCache.removeCache('/hello-remove');
+
+          agent
+          .get('/hello-remove')
+          .expect('Hello remove 2', done)
+        });
+      }, 1200);
+
+    });
+  });
+
 });
