@@ -19,7 +19,7 @@
   "author": "Brad Oyler <bradoyler@gmail.com> (github.com/bradoyler)",
   "license": "MIT",
   "dependencies": {
-    "eidetic": "0.1.1"
+    "eidetic": "^0.3.1"
   },
   "devDependencies": {
     "mocha": "~1.13.0",
