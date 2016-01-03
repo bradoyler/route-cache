@@ -4,7 +4,7 @@ Simple middleware for Express route caching with a given TTL (in seconds)
 [![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
 [![NPM Version][npm-image]][npm-url]
 
-Make your routes do this ->![dodging](http://gifs.gifbin.com/1234778873_Muhammad_Ali_dodging_punches.gif)
+Make your routes do this ->![dodging](http://forgifs.com/gallery/d/80400-8/Muhammad-Ali-dodges-punches.gif)
 
 ## Why?
 - makes hard-working routes super-fast, under heavy-load
