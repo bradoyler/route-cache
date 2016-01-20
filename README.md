@@ -3,6 +3,7 @@ Simple middleware for Express route caching with a given TTL (in seconds)
 
 [![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
 [![NPM Version][npm-image]][npm-url]
+[![Downloads][downloads-image]][npm-url]
 
 Make your routes do this ->![dodging](http://forgifs.com/gallery/d/80400-8/Muhammad-Ali-dodges-punches.gif)
 
@@ -69,4 +70,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 [npm-image]: https://img.shields.io/npm/v/route-cache.svg
+[downloads-image]: http://img.shields.io/npm/dm/route-cache.svg
 [npm-url]: https://npmjs.org/package/route-cache
