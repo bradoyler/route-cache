@@ -29,6 +29,10 @@ describe('# RouteCache middleware test', function(){
     res.send('Hello remove ' + testindexRemove)
   });
 
+  app.get('/hello-api', routeCache.cacheSeconds(3600), function (req, res) {
+    res.json({ msg: 'Hello' });
+  });
+
   var agent = request.agent(app);
 
   it('GET #1: Hello 1', function(done){
@@ -104,4 +108,15 @@ describe('# RouteCache middleware test', function(){
     });
   });
 
+  it('GET #9: res.json headers', function (done) {
+    agent
+      .get('/hello-api')
+      .expect('Content-Type', /json/).end(function (req, res) {
+        setTimeout(function () {
+          agent
+            .get('/hello-api')
+            .expect('Content-Type', /json/, done)
+        }, 200);
+      });
+  });
 });
