@@ -85,7 +85,7 @@ module.exports.cacheSeconds = function(ttl) {
       // subsequent requests will batch while the first computes
     } else {
       queues[key].push(function() {
-        var value = cacheStore.get(key);
+        var value = cacheStore.get(key) || {};
         if (value.isJson) {
           res.json(value.body);
         } else {
