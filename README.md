@@ -42,6 +42,30 @@ app.get('/index', routeCache.cacheSeconds(20), function(req, res){
 routeCache.removeCache('/index');
 ```
 
+Each Route with get params, must be cleared seperately or you can delete the whole caches
+
+## Delete all cached routes
+```javascript
+var routeCache = require('route-cache');
+routeCache.cacheStore.clear();
+```
+
+## get informations about cache
+
+```javascript
+var routeCache = require('route-cache');
+
+// max sum of cached routes
+routeCache.cacheStore.maxSize,
+// how much caches was served
+routeCache.cacheStore.hits(),
+// how much hits wihtout route cache served 
+routeCache.cacheStore.misses(),
+// how much cached routes are valid
+routeCache.cacheStore.currentSize()
+```
+
+
 ## Future plans / todos
 - client-side Cache-Control
 - support for distributed caches (redis or memcache)
