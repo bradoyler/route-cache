@@ -1,85 +1,105 @@
-
 var request = require('supertest'),
-    should = require('should'),
-    routeCache = require('../index'),
-    express = require('express');
+  should = require('should'),
+  routeCache = require('../index'),
+  express = require('express');
 
- var app = express(); 
- var testindex = 0;
- var testindexRemove = 0;
+var testindex = 0;
+var testindexRemove = 0;
 
-describe('# RouteCache middleware test', function(){
+describe('# RouteCache middleware test', function () {
   var app = express();
 
-  app.get('/hello', routeCache.cacheSeconds(1), function(req, res){
-     testindex++;
-     res.send('Hello ' + testindex)
+  app.get('/hello', routeCache.cacheSeconds(1), function (req, res) {
+    testindex++;
+    res.send('Hello ' + testindex);
   });
 
-  app.get('/500', routeCache.cacheSeconds(10), function(req, res){
+  app.get('/500', routeCache.cacheSeconds(10), function (req, res) {
     res.status(500).send('Internal server error: ' + Math.random());
   });
 
-  app.get('/redirect-to-hello', routeCache.cacheSeconds(1), function(req, res) {
+  app.get('/redirect-to-hello', routeCache.cacheSeconds(1), function (req, res) {
     res.redirect('/hello');
   });
 
-  app.get('/hello-remove', routeCache.cacheSeconds(3600), function(req, res){
+  app.get('/301-redirect-to-hello', routeCache.cacheSeconds(1), function (req, res) {
+    res.redirect(301, '/hello');
+  });
+
+  app.get('/302-redirect-to-hello', routeCache.cacheSeconds(1), function (req, res) {
+    res.redirect(302, '/hello');
+  });
+
+  app.get('/hello-remove', routeCache.cacheSeconds(3600), function (req, res) {
     testindexRemove++;
     res.send('Hello remove ' + testindexRemove)
   });
 
   app.get('/hello-api', routeCache.cacheSeconds(3600), function (req, res) {
-    res.json({ msg: 'Hello' });
+    res.json({msg: 'Hello'});
   });
 
   var agent = request.agent(app);
 
-  it('GET #1: Hello 1', function(done){
+  it('1st Hello', function (done) {
     agent
-    .get('/hello')
-    .expect('Hello 1', done);
-  });
- 
-  it('GET #2: Hello 1', function(done){
-    agent
-    .get('/hello')
-    .expect('Hello 1', done);
-  });
-
-  it('GET #3: Hello 1', function(done){
-    agent
-    .get('/hello')
-    .expect('Hello 1', done);
-  });
-
-  it('GET #4: Redirect to hello 1', function(done) {
-    agent
-      .get('/redirect-to-hello')
-      .expect(302, /\/hello/, done);
-  });
-
-  it('GET #5: Redirect to hello 2', function(done) {
-    agent
-      .get('/redirect-to-hello')
-      .expect(302, /\/hello/, done);
-  });
-
-  it('GET #6 ~ delayed: Hello 2', function(done){
-    setTimeout(function() {
-      agent
       .get('/hello')
-      .expect('Hello 2', done);
+      .expect('Hello 1', done);
+  });
+
+  it('2nd Hello', function (done) {
+    agent
+      .get('/hello')
+      .expect('Hello 1', done);
+  });
+
+  it('1st Redirect to hello', function (done) {
+    agent
+      .get('/redirect-to-hello')
+      .expect(302, /\/hello/, done);
+  });
+
+  it('2nd Redirect to hello', function (done) {
+    agent
+      .get('/redirect-to-hello')
+      .expect(302, /\/hello/, done);
+  });
+
+  it('301 Redirect to hello', function (done) {
+    agent
+      .get('/301-redirect-to-hello')
+      .expect(301, /\/hello/, done);
+  });
+
+  it('~ delayed 301 Redirect to hello', function (done) {
+    setTimeout(function () {
+      agent
+        .get('/301-redirect-to-hello')
+        .expect(301, /\/hello/, done);
     }, 1200);
   });
 
-  it('GET #7: Error states doesn\'t get cached', function(done){
+  it('Explicit 302 Redirect to hello', function (done) {
+    agent
+      .get('/302-redirect-to-hello')
+      .expect(302, /\/hello/, done);
+  });
+
+  it('~ delayed: Hello 2', function (done) {
+    setTimeout(function () {
+      agent
+        .get('/hello')
+        .expect('Hello 2', done);
+    }, 1200);
+  });
+
+  it('Error states don\'t get cached', function (done) {
     var message;
 
-    agent.get('/500').expect(500).end(function(req, res){
+    agent.get('/500').expect(500).end(function (req, res) {
       message = res.text;
 
-      agent.get('/500').expect(500).end(function(req, res){
+      agent.get('/500').expect(500).end(function (req, res) {
         if (message == res.text) return done(Error('Got same error message as before'));
         done();
       });
@@ -87,28 +107,28 @@ describe('# RouteCache middleware test', function(){
   });
 
 
-  it('GET #8: test removeCache', function(done){
+  it('test removeCache', function (done) {
     agent
-    .get('/hello-remove')
-    .expect('Hello remove 1').end(function(req, res){
+      .get('/hello-remove')
+      .expect('Hello remove 1').end(function (req, res) {
 
-      setTimeout(function() {
-        agent
-        .get('/hello-remove')
-        .expect('Hello remove 1').end(function(req, res){
-
-          routeCache.removeCache('/hello-remove');
-
+        setTimeout(function () {
           agent
-          .get('/hello-remove')
-          .expect('Hello remove 2', done)
-        });
-      }, 1200);
+            .get('/hello-remove')
+            .expect('Hello remove 1').end(function (req, res) {
 
-    });
+              routeCache.removeCache('/hello-remove');
+
+              agent
+                .get('/hello-remove')
+                .expect('Hello remove 2', done)
+            });
+        }, 1200);
+
+      });
   });
 
-  it('GET #9: res.json headers', function (done) {
+  it('res.json headers', function (done) {
     agent
       .get('/hello-api')
       .expect('Content-Type', /json/).end(function (req, res) {
