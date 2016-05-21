@@ -11,7 +11,9 @@ module.exports.cacheSeconds = function(ttl, cacheKey) {
 
   return function(req, res, next) {
     var key = (cacheKey === undefined) ? req.originalUrl : cacheKey;
-    if (redirects[key]) return res.redirect(redirects[key]);
+    if (redirects[key]) {
+      return res.redirect(redirects[key].status, redirects[key].url);
+    }
 
     var value = cacheStore.get(key);
 
@@ -75,17 +77,30 @@ module.exports.cacheSeconds = function(ttl, cacheKey) {
 
       // If response happens to be a redirect -- store it to redirect all
       // subsequent requests.
-      res.redirect = function(string) {
-        var body = string instanceof Buffer ? string.toString() : string;
-        redirects[key] = body;
-        res.original_redirect(body);
+      res.redirect = function(url) {
+        var address = url;
+        var status = 302;
+
+        // allow statusCode for 301 redirect. See: https://github.com/expressjs/express/blob/master/lib/response.js#L857
+        if (arguments.length === 2) {
+          if (typeof arguments[0] === 'number') {
+            status = arguments[0];
+            address = arguments[1];
+          } else {
+            console.log('res.redirect(url, status): Use res.redirect(status, url) instead');
+            status = arguments[1];
+          }
+        }
+
+        redirects[key] = {url: address, status:status};
+        res.original_redirect(status, address);
       };
 
       next();
       // subsequent requests will batch while the first computes
     } else {
       queues[key].push(function() {
-        var value = cacheStore.get(key);
+        var value = cacheStore.get(key) || {};
         if (value.isJson) {
           res.json(value.body);
         } else {
