@@ -99,12 +99,6 @@ describe('# RouteCache middleware test', function () {
     }, 1200);
   });
 
-  it('Hello test with param', function (done) {
-    agent
-      .get('/hello?a=1')
-      .expect('Hello 2', done); 
-  });
-
   it('Error states don\'t get cached', function (done) {
     var message;
 
