@@ -106,7 +106,7 @@ module.exports.cacheSeconds = function(ttl) {
           res.send(value.body);
         }
       });
-    };
+    }
   };
 };
 

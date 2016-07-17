@@ -22,9 +22,9 @@
     "eidetic": "^0.3.1"
   },
   "devDependencies": {
-    "mocha": "2.5.3",
     "express": "4.14.0",
-    "should": "2",
+    "mocha": "2.5.3",
+    "should": "9.0.2",
     "supertest": "1.2.0"
   },
   "bugs": {
