@@ -36,8 +36,7 @@ module.exports.cacheSeconds = function(ttl) {
     }
 
     // first request will get rendered output
-    if (queues[key].length === 0
-      && queues[key].push(function noop(){})) {
+    if (queues[key].length === 0 && queues[key].push(function noop(){})) {
 
       var didHandle = false;
 
@@ -50,7 +49,7 @@ module.exports.cacheSeconds = function(ttl) {
         // drain the queue so anyone else waiting for
         // this value will get their responses.
         var subscriber = null;
-        while (subscriber = queues[key].shift()) {
+        while (subscriber === queues[key].shift()) {
           if (subscriber) {
             process.nextTick(subscriber);
           }
@@ -107,10 +106,8 @@ module.exports.cacheSeconds = function(ttl) {
           res.send(value.body);
         }
       });
-    }
-
-  }
-
+    };
+  };
 };
 
 

@@ -32,7 +32,7 @@ describe('# RouteCache middleware test', function () {
 
   app.get('/hello-remove', routeCache.cacheSeconds(3600), function (req, res) {
     testindexRemove++;
-    res.send('Hello remove ' + testindexRemove)
+    res.send('Hello remove ' + testindexRemove);
   });
 
   app.get('/hello-api', routeCache.cacheSeconds(3600), function (req, res) {
@@ -103,7 +103,7 @@ describe('# RouteCache middleware test', function () {
         if (message == res.text) return done(Error('Got same error message as before'));
         done();
       });
-    })
+    });
   });
 
 
@@ -121,7 +121,7 @@ describe('# RouteCache middleware test', function () {
 
               agent
                 .get('/hello-remove')
-                .expect('Hello remove 2', done)
+                .expect('Hello remove 2', done);
             });
         }, 1200);
 
@@ -135,7 +135,7 @@ describe('# RouteCache middleware test', function () {
         setTimeout(function () {
           agent
             .get('/hello-api')
-            .expect('Content-Type', /json/, done)
+            .expect('Content-Type', /json/, done);
         }, 200);
       });
   });
