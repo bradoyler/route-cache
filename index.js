@@ -1,3 +1,4 @@
+'use strict';
 var Eidetic = require('eidetic');
 var cacheStore = new Eidetic({
   maxSize: 50,
@@ -35,32 +36,35 @@ module.exports.cacheSeconds = function(ttl) {
       queues[key] = [];
     }
 
+    var didHandle = false;
+
+    function rawSend(data, isJson) {
+      didHandle = true;
+      var key = req.originalUrl;
+
+      var body = data instanceof Buffer ? data.toString() : data;
+      if (res.statusCode < 400) cacheStore.put(key, { body: body, isJson: isJson }, ttl);
+
+      // drain the queue so anyone else waiting for
+      // this value will get their responses.
+      var subscriber = null;
+      while (subscriber === queues[key].shift()) {
+        if (subscriber) {
+          process.nextTick(subscriber);
+        }
+      }
+
+      if (isJson) {
+        res.original_json(body);
+      } else {
+        res.original_send(body);
+      }
+    }
+
     // first request will get rendered output
     if (queues[key].length === 0 && queues[key].push(function noop(){})) {
 
-      var didHandle = false;
-
-      function rawSend(data, isJson) {
-        didHandle = true;
-
-        var body = data instanceof Buffer ? data.toString() : data;
-        if (res.statusCode < 400) cacheStore.put(key, { body: body, isJson: isJson }, ttl);
-
-        // drain the queue so anyone else waiting for
-        // this value will get their responses.
-        var subscriber = null;
-        while (subscriber === queues[key].shift()) {
-          if (subscriber) {
-            process.nextTick(subscriber);
-          }
-        }
-
-        if (isJson) {
-          res.original_json(body);
-        } else {
-          res.original_send(body);
-        }
-      }
+      didHandle = false;
 
       res.send = function (data) {
         if (didHandle) {

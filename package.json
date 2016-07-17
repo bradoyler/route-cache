@@ -24,7 +24,6 @@
   "devDependencies": {
     "express": "4.14.0",
     "mocha": "2.5.3",
-    "should": "9.0.2",
     "supertest": "1.2.0"
   },
   "bugs": {
