@@ -1,5 +1,5 @@
+'use strict';
 var request = require('supertest'),
-  should = require('should'),
   routeCache = require('../index'),
   express = require('express');
 
@@ -12,6 +12,14 @@ describe('# RouteCache middleware test', function () {
   app.get('/hello', routeCache.cacheSeconds(1), function (req, res) {
     testindex++;
     res.send('Hello ' + testindex);
+  });
+
+  app.get('/hello/1', routeCache.cacheSeconds(1), function (req, res) {
+    res.send('Hello/1');
+  });
+
+  app.get('/hello/:num([0-9])', routeCache.cacheSeconds(1), function (req, res) {
+    res.send('Hello param:' + req.params.num);
   });
 
   app.get('/500', routeCache.cacheSeconds(10), function (req, res) {
@@ -51,6 +59,18 @@ describe('# RouteCache middleware test', function () {
     agent
       .get('/hello')
       .expect('Hello 1', done);
+  });
+
+  it('1st Hello w/ param', function (done) {
+    agent
+      .get('/hello/1')
+      .expect('Hello/1', done);
+  });
+
+  it('2nd Hello w/ param', function (done) {
+    agent
+      .get('/hello/2')
+      .expect('Hello param:2', done);
   });
 
   it('1st Redirect to hello', function (done) {

@@ -5,7 +5,7 @@ Simple middleware for Express route caching with a given TTL (in seconds)
 [![NPM Version][npm-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
 
-[![NPM](https://nodei.co/npm/route-cache.png?downloads=true&downloadRank=true)](https://nodei.co/npm/route-cache/) [![NPM](https://nodei.co/npm-dl/route-cache.png?months=6&height=3)](https://nodei.co/npm/route-cache/)
+[![NPM](https://nodei.co/npm/route-cache.png?downloads=true&downloadRank=true)](https://nodei.co/npm/route-cache/)
 
 Make your routes do this ->![dodging](http://forgifs.com/gallery/d/80400-8/Muhammad-Ali-dodges-punches.gif)
 
