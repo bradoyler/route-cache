@@ -50,7 +50,8 @@ Total:        905  909   6.1    907     926
 ```
 
 ## Test 1B - 5 sec cache, low volume
-Load: 20 requests, 2 concurrent users 
+Load: 20 requests, 2 concurrent users
+
 Cache TTL: 5 seconds
 
 #### Start
@@ -101,6 +102,7 @@ Total:          1   94 285.1      1     928
 
 ## Test 2 - 5 sec cache, high volume
 Load: 2000 requests, 20 concurrent users
+
 Cache TTL: 5 seconds
 
 #### Start
