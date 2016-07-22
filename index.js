@@ -39,16 +39,26 @@ module.exports.cacheSeconds = function(ttl) {
     var didHandle = false;
 
     function rawSend(data, isJson) {
-      didHandle = true;
       var key = req.originalUrl;
 
+      // pass-through for Buffer - not supported
+      if (typeof data === 'object') {
+        if (Buffer.isBuffer(data)) {
+          queues[key]=[]; // clear queue
+          res.set('Content-Length', data.length);
+          res.original_send(data);
+          return;
+        }
+      }
+
+      didHandle = true;
       var body = data instanceof Buffer ? data.toString() : data;
       if (res.statusCode < 400) cacheStore.put(key, { body: body, isJson: isJson }, ttl);
 
       // drain the queue so anyone else waiting for
       // this value will get their responses.
       var subscriber = null;
-      while (subscriber === queues[key].shift()) {
+      while (subscriber = queues[key].shift()) {
         if (subscriber) {
           process.nextTick(subscriber);
         }
