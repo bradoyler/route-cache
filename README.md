@@ -10,7 +10,7 @@ Simple middleware for Express route caching with a given TTL (in seconds)
 Make your routes do this ->![dodging](http://forgifs.com/gallery/d/80400-8/Muhammad-Ali-dodges-punches.gif)
 
 ## Why?
-- makes hard-working routes super-fast, under heavy-load
+- makes hard-working routes super-fast, under heavy-load, [see Load Tests](loadtests)
 - easy to use and fork for your needs
 - works with gzip compression
 
