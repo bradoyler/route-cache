@@ -1,4 +1,4 @@
-## Load testing 
+# Load Tests
 
 ## Test 1A - no cache, low volume
 Load: 20 requests, 2 concurrent users 
