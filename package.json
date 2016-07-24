@@ -1,6 +1,6 @@
 {
   "name": "route-cache",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "express middleware for caching your routes",
   "main": "index.js",
   "scripts": {
