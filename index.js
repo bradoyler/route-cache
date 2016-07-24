@@ -1,14 +1,16 @@
 'use strict'
-var Eidetic = require('eidetic')
-var cacheStore = new Eidetic({
-  maxSize: 50,
-  canPutWhenFull: true
+var LRU = require('lru-cache')
+var cacheStore = new LRU({
+  maxSize: 500,
+  maxAge: 30
 })
 
 var queues = {}
 var redirects = {}
 
-module.exports.cacheSeconds = function (ttl) {
+module.exports.cacheSeconds = function (secondsTTL) {
+  var ttl = secondsTTL * 1000
+
   return function (req, res, next) {
     var key = req.originalUrl
     if (redirects[key]) {
@@ -52,7 +54,7 @@ module.exports.cacheSeconds = function (ttl) {
 
       didHandle = true
       var body = data instanceof Buffer ? data.toString() : data
-      if (res.statusCode < 400) cacheStore.put(key, { body: body, isJson: isJson }, ttl)
+      if (res.statusCode < 400) cacheStore.set(key, { body: body, isJson: isJson }, ttl)
 
       // drain the queue so anyone else waiting for
       // this value will get their responses.
