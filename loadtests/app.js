@@ -4,7 +4,7 @@ var express = require('express')
 var routeCache = require('./../index')
 
 var CACHE_TTL = 20
-var HIT_CNT = 0 // for debugging back-pressure valve
+var HIT_CNT = 1 // for debugging back-pressure valve
 
 if (process.argv[3]) {
   if (isNaN(process.argv[3])) {
