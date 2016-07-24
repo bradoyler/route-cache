@@ -8,7 +8,7 @@ var hitIndex = 0;
 
 var app = express();
 var agent = request.agent(app);
-app.use(routeCache.cacheSeconds('disable'));
+app.use(routeCache.cacheSeconds(-1));
 
 describe('Cache disabled:', function () {
 

@@ -1,8 +1,8 @@
 'use strict'
-var Eidetic = require('eidetic')
-var cacheStore = new Eidetic({
-  maxSize: 50,
-  canPutWhenFull: true
+var NodeCache = require('node-cache')
+var cacheStore = new NodeCache({
+  stdTTL: 30,
+  checkperiod: 120
 })
 
 var queues = {}
@@ -52,7 +52,7 @@ module.exports.cacheSeconds = function (ttl) {
 
       didHandle = true
       var body = data instanceof Buffer ? data.toString() : data
-      if (res.statusCode < 400) cacheStore.put(key, { body: body, isJson: isJson }, ttl)
+      if (res.statusCode < 400) cacheStore.set(key, { body: body, isJson: isJson }, ttl)
 
       // drain the queue so anyone else waiting for
       // this value will get their responses.
