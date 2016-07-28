@@ -1,6 +1,6 @@
 'use strict';
 var request = require('supertest'),
-  routeCache = require('../index'),
+  routeCache = require('../index').config({max:99}),
   express = require('express');
 
 var hitIndex = 0;
