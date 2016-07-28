@@ -15,7 +15,6 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     if (redirects[key]) {
       return res.redirect(redirects[key].status, redirects[key].url)
     }
-    console.log(key)
     var value = cacheStore.get(key)
 
     if (value) {
