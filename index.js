@@ -8,15 +8,13 @@ var cacheStore = new LRU({
 var queues = {}
 var redirects = {}
 
-module.exports.cacheSeconds = function (secondsTTL) {
+module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   var ttl = secondsTTL * 1000
-
   return function (req, res, next) {
-    var key = req.originalUrl
+    var key = (cacheKey === undefined) ? req.originalUrl : cacheKey
     if (redirects[key]) {
       return res.redirect(redirects[key].status, redirects[key].url)
     }
-
     var value = cacheStore.get(key)
 
     if (value) {
@@ -40,7 +38,7 @@ module.exports.cacheSeconds = function (secondsTTL) {
     var didHandle = false
 
     function rawSend (data, isJson) {
-      var key = req.originalUrl
+      var key = (cacheKey === undefined) ? req.originalUrl : cacheKey
 
       // pass-through for Buffer - not supported
       if (typeof data === 'object') {
@@ -111,7 +109,7 @@ module.exports.cacheSeconds = function (secondsTTL) {
       }
 
       next()
-      // subsequent requests will batch while the first computes
+    // subsequent requests will batch while the first computes
     } else {
       queues[key].push(function () {
         var value = cacheStore.get(key) || {}
