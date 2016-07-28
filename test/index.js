@@ -15,11 +15,6 @@ describe('# RouteCache middleware test', function () {
     res.send('Hello ' + testindex)
   })
 
-  app.get('/params', routeCache.cacheSeconds(1, '/params-test'), function (req, res) {
-    paramTestindex++
-    res.send('Params test ' + paramTestindex)
-  })
-
   app.get('/hello/1', routeCache.cacheSeconds(1), function (req, res) {
     res.send('Hello/1')
   })
@@ -166,23 +161,5 @@ describe('# RouteCache middleware test', function () {
           .expect('Content-Type', /json/, done)
       }, 200)
     })
-  })
-
-  it('Params test without params', function (done) {
-    agent
-      .get('/params')
-      .expect('Params test 1', done)
-  })
-
-  it('Params test with a = 1', function (done) {
-    agent
-      .get('/params?a=1')
-      .expect('Params test 1', done)
-  })
-
-  it('Params test with a = 2', function (done) {
-    agent
-      .get('/params?a=2')
-      .expect('Params test 1', done)
   })
 })
