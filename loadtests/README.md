@@ -8,7 +8,7 @@ Cache TTL: disable
 #### Start
 
 ```sh
-$ node loadtest/app -TTL disabled
+$ node loadtests/app -TTL disabled
 ```
 
 In new terminal
@@ -57,7 +57,7 @@ Cache TTL: 5 seconds
 #### Start
 
 ```sh
-$ node loadtest/app -TTL 5
+$ node loadtests/app -TTL 5
 ```
 
 In new terminal
@@ -108,7 +108,7 @@ Cache TTL: 5 seconds
 #### Start
 
 ```sh
-$ node loadtest/app -TTL 5
+$ node loadtests/app -TTL 5
 ```
 
 In new terminal
