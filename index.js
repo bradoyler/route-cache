@@ -1,12 +1,18 @@
 'use strict'
 var LRU = require('lru-cache')
-var cacheStore = new LRU({
-  maxSize: 500,
-  maxAge: 30
-})
 
 var queues = {}
 var redirects = {}
+var defaults = {max: 500, maxAge: 100}
+var cacheStore = new LRU(defaults)
+
+module.exports.config = function (opts) {
+  if (opts && opts.max) {
+    defaults.max = opts.max
+  }
+  cacheStore = new LRU(defaults)
+  return this
+}
 
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   var ttl = secondsTTL * 1000
