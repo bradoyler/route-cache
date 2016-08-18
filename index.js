@@ -3,7 +3,16 @@ var LRU = require('lru-cache')
 
 var queues = {}
 var redirects = {}
-var defaults = {max: 500, maxAge: 100}
+var defaults = {
+  max: 64 * 1000000, // ~64mb
+  length: function (n, key) {
+    if (n.body && typeof n.body === 'string') {
+      return n.body.length
+    }
+    return 1
+  },
+  maxAge: 200 // deletes stale cache older than 200ms
+}
 var cacheStore = new LRU(defaults)
 
 module.exports.config = function (opts) {
