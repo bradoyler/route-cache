@@ -25,7 +25,7 @@
     "express": "4.14.0",
     "mocha": "2.5.3",
     "morgan": "1.7.0",
-    "standard": "7.1.2",
+    "standard": "8.0.0",
     "supertest": "1.2.0"
   },
   "standard": {
