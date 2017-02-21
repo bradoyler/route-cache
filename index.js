@@ -26,11 +26,11 @@ module.exports.config = function (opts) {
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   var ttl = secondsTTL * 1000
   return function (req, res, next) {
-    var key = req.originalUrl
+    var key = req.originalUrl // default cache key
     if (typeof cacheKey === 'function') {
-      key = cacheKey(req, res)
+      key = cacheKey(req, res) // dynamic key
     } else if (typeof cacheKey === 'string') {
-      key = cacheKey
+      key = cacheKey // custom key
     }
 
     if (redirects[key]) {

@@ -26,18 +26,33 @@ npm test
 
 ## How to use
 ```javascript
-
 var routeCache = require('route-cache');
 
 // cache route for 20 seconds
 app.get('/index', routeCache.cacheSeconds(20), function(req, res){
-	// do your dirty work here...
-	console.log('you will only see this every 20 seconds.');
-	res.send('this response will be cached');
+  // do your dirty work here...
+  console.log('you will only see this every 20 seconds.');
+  res.send('this response will be cached');
 });
-
-
 ```
+
+By default `req.originalUrl` is used as the cache key so every URL is cached separately.
+
+You can set a custom key by passing a second argument to `cacheSeconds`.
+
+```javascript
+routeCache.cacheSeconds(20, 'my-custom-cache-key')
+```
+
+You can set a dynamic key from the `req` and `res` objects by passing a function.
+
+```javascript
+// Cache authenticated and unauthenticated responses separately
+routeCache.cacheSeconds(20, function(req, res) {
+  return req.originalUrl + '|' + res.locals.signedIn
+})
+```
+
 
 ## Delete a cached route
 ```javascript
