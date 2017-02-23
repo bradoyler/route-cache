@@ -26,7 +26,13 @@ module.exports.config = function (opts) {
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   var ttl = secondsTTL * 1000
   return function (req, res, next) {
-    var key = (cacheKey === undefined) ? req.originalUrl : cacheKey
+    var key = req.originalUrl // default cache key
+    if (typeof cacheKey === 'function') {
+      key = cacheKey(req, res) // dynamic key
+    } else if (typeof cacheKey === 'string') {
+      key = cacheKey // custom key
+    }
+
     if (redirects[key]) {
       return res.redirect(redirects[key].status, redirects[key].url)
     }
@@ -53,8 +59,6 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     var didHandle = false
 
     function rawSend (data, isJson) {
-      var key = (cacheKey === undefined) ? req.originalUrl : cacheKey
-
       // pass-through for Buffer - not supported
       if (typeof data === 'object') {
         if (Buffer.isBuffer(data)) {
