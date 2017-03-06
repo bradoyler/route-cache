@@ -2,7 +2,6 @@
 var LRU = require('lru-cache')
 
 var queues = {}
-var redirects = {}
 var defaults = {
   max: 64 * 1000000, // ~64mb
   length: function (n, key) {
@@ -33,9 +32,11 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       key = cacheKey // custom key
     }
 
-    if (redirects[key]) {
-      return res.redirect(redirects[key].status, redirects[key].url)
+    var redirectKey = cacheStore.get('redirect:' + key)
+    if (redirectKey) {
+      return res.redirect(redirectKey.status, redirectKey.url)
     }
+
     var value = cacheStore.get(key)
 
     if (value) {
@@ -106,9 +107,9 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
         rawSend(data, true)
       }
 
-      // If response happens to be a redirect -- store it to redirect all
-      // subsequent requests.
+      // If response happens to be a redirect -- store it to redirect all subsequent requests.
       res.redirect = function (url) {
+        queues[key] = []
         var address = url
         var status = 302
 
@@ -123,8 +124,8 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
           }
         }
 
-        redirects[key] = {url: address, status: status}
-        res.original_redirect(status, address)
+        cacheStore.set('redirect:' + key, {url: address, status: status}, ttl)
+        return res.original_redirect(status, address)
       }
 
       next()
@@ -143,9 +144,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
 }
 
 module.exports.removeCache = function (url) {
-  if (redirects[url]) {
-    delete redirects[url]
-  }
+  cacheStore.del('redirect:' + url)
   cacheStore.del(url)
 }
 
