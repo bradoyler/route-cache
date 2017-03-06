@@ -109,7 +109,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
 
       // If response happens to be a redirect -- store it to redirect all subsequent requests.
       res.redirect = function (url) {
-        queues[key] = []
+        delete queues[key]
         var address = url
         var status = 302
 
