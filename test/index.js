@@ -100,6 +100,14 @@ describe('# RouteCache middleware test', function () {
     }, 1200)
   })
 
+  it('~ delayed 302 Redirect to hello', function (done) {
+    setTimeout(function () {
+      agent
+        .get('/redirect-to-hello')
+        .expect(302, /\/hello/, done)
+    }, 1200)
+  })
+
   it('Explicit 302 Redirect to hello', function (done) {
     agent
       .get('/302-redirect-to-hello')
