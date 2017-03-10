@@ -22,6 +22,15 @@ module.exports.config = function (opts) {
   return this
 }
 
+function drainQueue (key) {
+  var subscriber = null
+  while (queues[key].length > 0) {
+    subscriber = queues[key].shift()
+    process.nextTick(subscriber)
+  }
+  delete queues[key]
+}
+
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   var ttl = secondsTTL * 1000
   return function (req, res, next) {
@@ -40,7 +49,6 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     }
 
     var value = cacheStore.get(key)
-
     if (value) {
       // returns the value immediately
       if (value.isJson) {
@@ -76,14 +84,8 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       var body = data instanceof Buffer ? data.toString() : data
       if (res.statusCode < 400) cacheStore.set(key, { body: body, isJson: isJson }, ttl)
 
-      // drain the queue so anyone else waiting for
-      // this value will get their responses.
-      var subscriber = null
-      while (queues[key].length > 0) {
-        subscriber = queues[key].shift()
-        process.nextTick(subscriber)
-      }
-      delete queues[key]
+      // send this response to everyone in the queue
+      drainQueue(key)
 
       if (isJson) {
         res.original_json(body)
@@ -127,13 +129,19 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
         }
 
         cacheStore.set('redirect:' + key, {url: address, status: status}, ttl)
-        return res.original_redirect(status, address)
+        res.original_redirect(status, address)
+        return drainQueue(key)
       }
 
       next()
     // subsequent requests will batch while the first computes
     } else {
       queues[key].push(function () {
+        var redirectKey = cacheStore.get('redirect:' + key)
+        if (redirectKey) {
+          return res.redirect(redirectKey.status, redirectKey.url)
+        }
+
         var value = cacheStore.get(key) || {}
         if (value.isJson) {
           res.json(value.body)
