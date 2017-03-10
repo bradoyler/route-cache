@@ -27,6 +27,11 @@ router.get('/', function (req, res, next) {
   }, 900)
 })
 
+router.get('/redirect', function (req, res, next) {
+  console.log('>>> Redirect Route Hit:', HIT_CNT++, new Date())
+  res.redirect('/dest')
+})
+
 // <<< routes.js
 
 // app.js
