@@ -28,6 +28,8 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     var key = req.originalUrl // default cache key
     if (typeof cacheKey === 'function') {
       key = cacheKey(req, res) // dynamic key
+      // Allow skipping the cache
+      if (!key) { return next() }
     } else if (typeof cacheKey === 'string') {
       key = cacheKey // custom key
     }
