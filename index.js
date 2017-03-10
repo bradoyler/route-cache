@@ -81,6 +81,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
         subscriber = queues[key].shift()
         process.nextTick(subscriber)
       }
+      delete queues[key]
 
       if (isJson) {
         res.original_json(body)
@@ -109,7 +110,6 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
 
       // If response happens to be a redirect -- store it to redirect all subsequent requests.
       res.redirect = function (url) {
-        delete queues[key]
         var address = url
         var status = 302
 
