@@ -3,17 +3,11 @@ var request = require('supertest'),
   routeCache = require('../index'),
   express = require('express');
 
-var hitIndex = 0;
-
 var app = express();
 var agent = request.agent(app);
 app.use(routeCache.cacheSeconds(30));
 
 describe('res.redirect caching', function () {
-
-  app.get('/dest', function () {
-    res.send('redirect ' + hitIndex);
-  });
 
   app.get('/redirect-test', function (req, res) {
     res.redirect('/dest');
