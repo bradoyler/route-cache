@@ -28,8 +28,10 @@ router.get('/', function (req, res, next) {
 })
 
 router.get('/redirect', function (req, res, next) {
-  console.log('>>> Redirect Route Hit:', HIT_CNT++, new Date())
-  res.redirect('/dest')
+  setTimeout(() => {
+    console.log('>>> Redirect Route Hit:', HIT_CNT++, new Date())
+    res.redirect('/dest')
+  }, 900)
 })
 
 // <<< routes.js
