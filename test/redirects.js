@@ -3,18 +3,11 @@ var request = require('supertest'),
   routeCache = require('../index'),
   express = require('express');
 
-var hitIndex = 0;
-
 var app = express();
 var agent = request.agent(app);
 app.use(routeCache.cacheSeconds(30));
 
 describe('res.redirect caching', function () {
-
-  app.get('/dest', function () {
-    hitIndex++;
-    res.send('redirect ' + hitIndex);
-  });
 
   app.get('/redirect-test', function (req, res) {
     res.redirect('/dest');
@@ -26,6 +19,12 @@ describe('res.redirect caching', function () {
 
   app.get('/302-redirect-test', function (req, res) {
     res.redirect(302, '/dest');
+  });
+
+  app.get('/slow-redirect-test', function (req, res) {
+    setTimeout(function () {
+      res.redirect('/dest');
+    }, 200);
   });
 
   it('1st redirect', function (done) {
@@ -58,6 +57,27 @@ describe('res.redirect caching', function () {
     agent
       .get('/302-redirect-test')
       .expect(302, /\/dest/, done);
+  });
+
+  it('slow redirect should start queue', function (done) {
+    var hits = 0
+    function partiallyDone() {
+      hits++
+      if (hits === 3) { done() }
+    }
+
+    agent
+      .get('/slow-redirect-test')
+      .expect(302, /\/dest/, partiallyDone);
+
+    agent
+      .get('/slow-redirect-test')
+      .expect(302, /\/dest/, partiallyDone);
+
+    agent
+      .get('/slow-redirect-test')
+      .expect(302, /\/dest/, partiallyDone);
+
   });
 
 });

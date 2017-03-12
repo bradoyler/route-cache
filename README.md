@@ -53,6 +53,16 @@ routeCache.cacheSeconds(20, function(req, res) {
 })
 ```
 
+If you return `false` the response will not be cached.
+
+```javascript
+// Only cache unauthenticated responses
+routeCache.cacheSeconds(20, function(req, res) {
+  if (res.locals.signedIn) { return false }
+
+  return req.originalUrl
+})
+```
 
 ## Delete a cached route
 ```javascript
