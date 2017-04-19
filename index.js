@@ -1,7 +1,8 @@
 'use strict'
 var LRU = require('lru-cache')
 
-var queues = {}
+var queues = Object.create(null)
+
 var defaults = {
   max: 64 * 1000000, // ~64mb
   length: function (n, key) {
