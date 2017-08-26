@@ -4,7 +4,7 @@
   "description": "express middleware for caching your routes",
   "main": "index.js",
   "scripts": {
-    "test": "standard && mocha -R spec test"
+    "test": "standard && DEBUG=route-cache mocha -R spec test"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   "author": "Brad Oyler <bradoyler@gmail.com> (github.com/bradoyler)",
   "license": "MIT",
   "dependencies": {
+    "debug": "3.0.1",
     "lru-cache": "4.0.1"
   },
   "devDependencies": {

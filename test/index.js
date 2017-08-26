@@ -1,14 +1,15 @@
+/* globals decribe */
 'use strict'
-var request = require('supertest'),
-  routeCache = require('../index'),
-  express = require('express')
+const request = require('supertest')
+const routeCache = require('../index')
+const express = require('express')
 
-var testindex = 0
-var paramTestindex = 0
-var testindexRemove = 0
+let testindex = 0
+let paramTestindex = 0
+let testindexRemove = 0
 
 describe('# RouteCache middleware test', function () {
-  var app = express()
+  const app = express()
 
   app.get('/hello', routeCache.cacheSeconds(1), function (req, res) {
     testindex++
@@ -48,7 +49,7 @@ describe('# RouteCache middleware test', function () {
     res.json({msg: 'Hello'})
   })
 
-  var agent = request.agent(app)
+  const agent = request.agent(app)
 
   it('1st Hello', function (done) {
     agent
@@ -129,7 +130,7 @@ describe('# RouteCache middleware test', function () {
   })
 
   it("Error states don't get cached", function (done) {
-    var message
+    let message
 
     agent.get('/500').expect(500).end(function (req, res) {
       message = res.text

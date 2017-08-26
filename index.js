@@ -1,9 +1,9 @@
 'use strict'
-var LRU = require('lru-cache')
+const LRU = require('lru-cache')
+const debug = require('debug')('route-cache')
+const queues = Object.create(null)
 
-var queues = Object.create(null)
-
-var defaults = {
+const defaults = {
   max: 64 * 1000000, // ~64mb
   length: function (n, key) {
     if (n.body && typeof n.body === 'string') {
@@ -13,7 +13,7 @@ var defaults = {
   },
   maxAge: 200 // deletes stale cache older than 200ms
 }
-var cacheStore = new LRU(defaults)
+let cacheStore = new LRU(defaults)
 
 module.exports.config = function (opts) {
   if (opts && opts.max) {
@@ -24,8 +24,9 @@ module.exports.config = function (opts) {
 }
 
 function drainQueue (key) {
-  var subscriber = null
-  while (queues[key].length > 0) {
+  debug('drain!', key)
+  let subscriber = null
+  while (queues[key] && queues[key].length > 0) {
     subscriber = queues[key].shift()
     process.nextTick(subscriber)
   }
@@ -33,7 +34,7 @@ function drainQueue (key) {
 }
 
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
-  var ttl = secondsTTL * 1000
+  const ttl = secondsTTL * 1000
   return function (req, res, next) {
     var key = req.originalUrl // default cache key
     if (typeof cacheKey === 'function') {
@@ -44,14 +45,15 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       key = cacheKey // custom key
     }
 
-    var redirectKey = cacheStore.get('redirect:' + key)
+    const redirectKey = cacheStore.get('redirect:' + key)
     if (redirectKey) {
       return res.redirect(redirectKey.status, redirectKey.url)
     }
 
-    var value = cacheStore.get(key)
+    const value = cacheStore.get(key)
     if (value) {
       // returns the value immediately
+      debug('hit!!', key)
       if (value.isJson) {
         res.json(value.body)
       } else {
@@ -71,6 +73,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     var didHandle = false
 
     function rawSend (data, isJson) {
+      debug('rawSend', typeof data, data.length)
       // pass-through for Buffer - not supported
       if (typeof data === 'object') {
         if (Buffer.isBuffer(data)) {
@@ -89,19 +92,23 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       drainQueue(key)
 
       if (isJson) {
+        debug('res.original_json')
         res.original_json(body)
       } else {
+        debug('res.original_send')
         res.original_send(body)
       }
     }
 
     // first request will get rendered output
     if (queues[key].length === 0) {
+      debug('miss:', key)
       queues[key].push(function noop () {})
 
       didHandle = false
 
       res.send = function (data) {
+        // debug('res.send() >>', data.length)
         if (didHandle) {
           res.original_send(data)
         } else {
@@ -115,8 +122,8 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
 
       // If response happens to be a redirect -- store it to redirect all subsequent requests.
       res.redirect = function (url) {
-        var address = url
-        var status = 302
+        let address = url
+        let status = 302
 
         // allow statusCode for 301 redirect. See: https://github.com/expressjs/express/blob/master/lib/response.js#L857
         if (arguments.length === 2) {
@@ -137,13 +144,15 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       next()
     // subsequent requests will batch while the first computes
     } else {
+      debug(key, '>> has queue.length:', queues[key].length)
       queues[key].push(function () {
-        var redirectKey = cacheStore.get('redirect:' + key)
+        const redirectKey = cacheStore.get('redirect:' + key)
         if (redirectKey) {
           return res.redirect(redirectKey.status, redirectKey.url)
         }
 
-        var value = cacheStore.get(key) || {}
+        const value = cacheStore.get(key) || {}
+        debug('>> queued hit:', key, value.length)
         if (value.isJson) {
           res.json(value.body)
         } else {
