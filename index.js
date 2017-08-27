@@ -24,7 +24,7 @@ module.exports.config = function (opts) {
 }
 
 function drainQueue (key) {
-  debug('drain!', key)
+  debug('drainQueue:', key)
   let subscriber = null
   while (queues[key] && queues[key].length > 0) {
     subscriber = queues[key].shift()
@@ -36,7 +36,7 @@ function drainQueue (key) {
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   const ttl = secondsTTL * 1000
   return function (req, res, next) {
-    var key = req.originalUrl // default cache key
+    let key = req.originalUrl // default cache key
     if (typeof cacheKey === 'function') {
       key = cacheKey(req, res) // dynamic key
       // Allow skipping the cache
@@ -63,6 +63,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     }
 
     res.original_send = res.send
+    res.original_end = res.end
     res.original_json = res.json
     res.original_redirect = res.redirect
 
@@ -70,7 +71,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       queues[key] = []
     }
 
-    var didHandle = false
+    let didHandle = false
 
     function rawSend (data, isJson) {
       debug('rawSend', typeof data, data.length)
@@ -85,7 +86,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       }
 
       didHandle = true
-      var body = data instanceof Buffer ? data.toString() : data
+      const body = data instanceof Buffer ? data.toString() : data
       if (res.statusCode < 400) cacheStore.set(key, { body: body, isJson: isJson }, ttl)
 
       // send this response to everyone in the queue
@@ -114,6 +115,11 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
         } else {
           rawSend(data, false)
         }
+      }
+
+      res.end = (data) => {
+        res.original_end(data)
+        drainQueue(key)
       }
 
       res.json = function (data) {
