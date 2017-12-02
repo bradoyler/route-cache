@@ -1,5 +1,5 @@
 # Route-Cache
-Simple middleware for Express route caching with a given TTL (in seconds)
+Blazing fast :bullettrain_side: Express middleware for route caching with a given TTL (in seconds)
 
 [![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
 [![NPM Version][npm-image]][npm-url]
@@ -11,7 +11,10 @@ Make your routes do this ->![dodging](http://forgifs.com/gallery/d/80400-8/Muham
 
 ## Why?
 - makes hard-working routes super-fast, under heavy-load, [see Load Tests](loadtests)
-- easy to use and fork for your needs
+- defend against 'thundering herd'
+- supports various content-types
+- support for redirects
+- allows for conditional caching (per request)
 - works with gzip compression
 
 ## Install
