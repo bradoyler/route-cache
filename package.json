@@ -19,7 +19,7 @@
   "author": "Brad Oyler <bradoyler@gmail.com> (github.com/bradoyler)",
   "license": "MIT",
   "dependencies": {
-    "debug": "3.0.1",
+    "debug": "3.1.0",
     "lru-cache": "4.0.1"
   },
   "devDependencies": {
