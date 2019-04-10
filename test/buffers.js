@@ -30,15 +30,15 @@ describe('Buffers', function () {
   it('Send Buffer', function (done) {
     agent
       .get('/send-buffer')
-      .expect('Content-Length', 11)
+      .expect('Content-Length', '11')
       .expect('Content-Type', 'application/octet-stream')
-      .expect('Test Buffer', done);
+      .expect(undefined, done);
   });
 
   it('Send PNG (Buffer) #1', function (done) {
     agent
       .get('/send-png')
-      .expect('Content-Length', 8)
+      .expect('Content-Length', '8')
       .expect('Content-Type', 'image/png')
       .expect(undefined, done);
   });
@@ -46,7 +46,7 @@ describe('Buffers', function () {
   it('Send PNG (Buffer) #2', function (done) {
     agent
       .get('/send-png')
-      .expect('Content-Length', 8)
+      .expect('Content-Length', '8')
       .expect('Content-Type', 'image/png')
       .expect(undefined, done);
   });
@@ -54,7 +54,7 @@ describe('Buffers', function () {
   it('Send GIF', function (done) {
     agent
       .get('/send-gif')
-      .expect('Content-Length', 11)
+      .expect('Content-Length', '11')
       .expect('Content-Type', 'image/gif')
       .expect(undefined, done);
   });

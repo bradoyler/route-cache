@@ -142,7 +142,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
           }
         }
 
-        cacheStore.set('redirect:' + key, {url: address, status: status}, ttl)
+        cacheStore.set('redirect:' + key, { url: address, status: status }, ttl)
         res.original_redirect(status, address)
         return drainQueue(key)
       }
