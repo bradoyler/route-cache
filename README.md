@@ -1,13 +1,13 @@
 # Route-Cache
 Blazing fast :bullettrain_side: Express middleware for route caching with a given TTL (in seconds)
 
-[![Build Status](https://travis-ci.org/bradoyler/route-cache.svg?branch=master)](https://travis-ci.org/bradoyler/route-cache)
+[![Build Status](https://travis-ci.com/bradoyler/route-cache.svg?branch=master)](https://travis-ci.com/bradoyler/route-cache)
 [![NPM Version][npm-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
 
 [![NPM](https://nodei.co/npm/route-cache.png?downloads=true&downloadRank=true)](https://nodei.co/npm/route-cache/) [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-Make your routes do this ->![dodging](http://forgifs.com/gallery/d/80400-8/Muhammad-Ali-dodges-punches.gif)
+Make your routes do this ->![ali-dodging-punches](https://i.imgur.com/LRZwzN5.gif)
 
 ## Why?
 - makes hard-working routes super-fast, under heavy-load, [see Load Tests](loadtests)
