@@ -74,7 +74,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
     let didHandle = false
 
     function rawSend (data, isJson) {
-      debug('rawSend', typeof data, data.length)
+      debug('rawSend', typeof data, data ? data.length : 0)
       // pass-through for Buffer - not supported
       if (typeof data === 'object') {
         if (Buffer.isBuffer(data)) {
