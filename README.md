@@ -7,8 +7,6 @@ Blazing fast :bullettrain_side: Express middleware for route caching with a give
 
 [![NPM](https://nodei.co/npm/route-cache.png?downloads=true&downloadRank=true)](https://nodei.co/npm/route-cache/) [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-Make your routes do this ->![ali-dodging-punches](https://i.imgur.com/LRZwzN5.gif)
-
 ## Why?
 - makes hard-working routes super-fast, under heavy-load, [see Load Tests](loadtests)
 - defend against 'thundering herd'
