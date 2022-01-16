@@ -17,15 +17,28 @@ describe('res.json caching', function () {
     res.json({msg: 'Hit#'+hitIndex});
   });
 
+  app.get('/test-null-json', function (req, res) {
+    res.json(null);
+  });
+
+  it('res.json null body', function (done) {
+    agent
+      .get('/test-null-json')
+      .expect('Content-Length', '4')
+      .expect(null, done);
+  });
+
   it('res.json data', function (done) {
     agent
       .get('/test-json')
+      .expect('Content-Length', '15')
       .expect({msg: 'Hit#1'}, done);
   });
 
   it('res.json data', function (done) {
     agent
       .get('/test-json')
+      .expect('Content-Length', '15')
       .expect({msg: 'Hit#1'}, done);
   });
 
