@@ -21,7 +21,8 @@
   "license": "MIT",
   "dependencies": {
     "debug": "3.1.0",
-    "lru-cache": "4.0.1"
+    "lru-cache": "4.0.1",
+    "sinon": "^14.0.0"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",

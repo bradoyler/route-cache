@@ -70,9 +70,19 @@ routeCache.cacheSeconds(20, function(req, res) {
 routeCache.removeCache('/index');
 ```
 
+## Use a distributed cache
+```javascript
+const Redis = require('ioredis')
+const IoRedisStore = require('route-cache/ioRedisStore')
+
+
+const redisClient = new Redis(6379, '127.0.0.1'))
+const cacheStore = new IoRedisStore(redisClient)
+routeCache.config({cacheStore})
+```
+
 ## Future plans / todos
 - client-side Cache-Control
-- support for distributed caches (redis or memcache)
 
 ------
 The MIT License (MIT)
