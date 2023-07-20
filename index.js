@@ -198,4 +198,8 @@ module.exports.removeCache = function (url) {
   cacheStore.del(url)
 }
 
+module.exports.clearCache = function () {
+  cacheStore.clear()
+}
+
 module.exports.cacheStore = cacheStore
