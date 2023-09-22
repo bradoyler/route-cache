@@ -33,7 +33,7 @@
   },
   "standard": {
     "ignore": [
-      "test/**"
+      "test/**", "loadtests/**"
     ]
   },
   "bugs": {
