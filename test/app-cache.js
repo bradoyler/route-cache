@@ -1,9 +1,11 @@
 'use strict';
 var request = require('supertest'),
   routeCache = require('../index').config({max:99}),
-  express = require('express');
+  express = require('express'),
+  assert = require('assert');
 
 var hitIndex = 0;
+var noContentIndex = 0;
 
 var app = express();
 var agent = request.agent(app);
@@ -29,6 +31,16 @@ describe('App-level cache:', function () {
   app.get('/test-api', function (req, res) {
     hitIndex++;
     res.json({msg: 'Hit#'+hitIndex});
+  });
+
+  app.get('/send-test-204', function (req, res) {
+    noContentIndex++;
+    res.status(204).send();
+  });
+
+  app.get('/test-api-204', function (req, res) {
+    noContentIndex++;
+    res.status(204).json();
   });
 
   it('1st res.send', function (done) {
@@ -91,5 +103,39 @@ describe('App-level cache:', function () {
       });
   });
 
+  it('1st send-test-204', function (done) {
+    agent
+      .get('/send-test-204')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 1)
+        done()
+      })
+  })
 
+  it('2st send-test-204', function (done) {
+    agent
+      .get('/send-test-204')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 1)
+        done()
+      })
+  })
+
+  it('1st test-api-204', function (done) {
+    agent
+      .get('/test-api-204')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 2)
+        done()
+      })
+  })
+
+  it('2st test-api-204', function (done) {
+    agent
+      .get('/test-api-204')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 2)
+        done()
+      })
+  })
 });

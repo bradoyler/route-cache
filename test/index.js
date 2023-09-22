@@ -3,8 +3,10 @@
 const request = require('supertest')
 const routeCache = require('../index')
 const express = require('express')
+const assert = require('assert');
 
 let testindex = 0
+let noContentIndex = 0
 let paramTestindex = 0
 let testindexRemove = 0
 
@@ -22,6 +24,11 @@ describe('# RouteCache middleware test', function () {
 
   app.get('/hello/:num([0-9])', routeCache.cacheSeconds(1), function (req, res) {
     res.send('Hello param:' + req.params.num)
+  })
+
+  app.get('/204', routeCache.cacheSeconds(10), function (req, res) {
+    noContentIndex++
+    res.status(204).send()
   })
 
   app.get('/500', routeCache.cacheSeconds(10), function (req, res) {
@@ -49,30 +56,57 @@ describe('# RouteCache middleware test', function () {
     res.json({msg: 'Hello'})
   })
 
+  app.get('/204-api', routeCache.cacheSeconds(3600), function (req, res) {
+    noContentIndex++
+    res.status(204).json()
+  })
+
   const agent = request.agent(app)
 
   it('1st Hello', function (done) {
     agent
       .get('/hello')
+      .expect(200)
       .expect('Hello 1', done)
   })
 
   it('2nd Hello', function (done) {
     agent
       .get('/hello')
+      .expect(200)
       .expect('Hello 1', done)
   })
 
   it('1st Hello w/ param', function (done) {
     agent
       .get('/hello/1')
+      .expect(200)
       .expect('Hello/1', done)
   })
 
   it('2nd Hello w/ param', function (done) {
     agent
       .get('/hello/2')
+      .expect(200)
       .expect('Hello param:2', done)
+  })
+
+  it('1st 204', function (done) {
+    agent
+      .get('/204')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 1)
+        done()
+      })
+  })
+
+  it('2st 204', function (done) {
+    agent
+      .get('/204')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 1)
+        done()
+      })
   })
 
   it('1st Redirect to hello', function (done) {
@@ -119,6 +153,7 @@ describe('# RouteCache middleware test', function () {
     setTimeout(function () {
       agent
         .get('/hello')
+        .expect(200)
         .expect('Hello 2', done)
     }, 1200)
   })
@@ -126,6 +161,7 @@ describe('# RouteCache middleware test', function () {
   it('Hello test with param', function (done) {
     agent
       .get('/hello?a=1')
+      .expect(200)
       .expect('Hello 3', done)
   })
 
@@ -145,15 +181,18 @@ describe('# RouteCache middleware test', function () {
   it('test removeCache', function (done) {
     agent
       .get('/hello-remove')
+      .expect(200)
       .expect('Hello remove 1').end(function (req, res) {
       setTimeout(function () {
         agent
           .get('/hello-remove')
+          .expect(200)
           .expect('Hello remove 1').end(function (req, res) {
           routeCache.removeCache('/hello-remove')
 
           agent
             .get('/hello-remove')
+            .expect(200)
             .expect('Hello remove 2', done)
         })
       }, 1200)
@@ -163,12 +202,32 @@ describe('# RouteCache middleware test', function () {
   it('res.json headers', function (done) {
     agent
       .get('/hello-api')
+      .expect(200)
       .expect('Content-Type', /json/).end(function (req, res) {
       setTimeout(function () {
         agent
           .get('/hello-api')
+          .expect(200)
           .expect('Content-Type', /json/, done)
       }, 200)
     })
+  })
+
+  it('1st 204-api', function (done) {
+    agent
+      .get('/204-api')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 2)
+        done()
+      })
+  })
+
+  it('2st 204-api', function (done) {
+    agent
+      .get('/204-api')
+      .expect(204, () => {
+        assert.equal(noContentIndex, 2)
+        done()
+      })
   })
 })
