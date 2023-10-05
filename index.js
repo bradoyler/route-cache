@@ -66,9 +66,9 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
           // returns the value immediately
           debug('hit!!', key)
           if (value.isJson) {
-            res.json(value.body)
+            res.status(value.status).json(value.body)
           } else {
-            res.send(value.body)
+            res.status(value.status).send(value.body)
           }
           return true
         }
@@ -102,7 +102,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
 
         didHandle = true
         const body = data instanceof Buffer ? data.toString() : data
-        if (res.statusCode < 400) cacheStore.set(key, { body: body, isJson: isJson }, ttl)
+        if (res.statusCode < 400) cacheStore.set(key, { status: res.statusCode, body: body, isJson: isJson }, ttl)
 
         // send this response to everyone in the queue
         drainQueue(key)
@@ -181,9 +181,9 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
                 const value = cachedValue || {}
                 debug('>> queued hit:', key, value.length)
                 if (value.isJson) {
-                  res.json(value.body)
+                  res.status(value.status || 200).json(value.body)
                 } else {
-                  res.send(value.body)
+                  res.status(value.status || 200).send(value.body)
                 }
               })
             })

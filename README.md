@@ -1,7 +1,7 @@
 # Route-Cache
 Blazing fast :bullettrain_side: Express middleware for route caching with a given TTL (in seconds)
 
-[![Build Status](https://travis-ci.com/bradoyler/route-cache.svg?branch=master)](https://travis-ci.com/bradoyler/route-cache)
+[![Build Status](https://github.com/bradoyler/route-cache/actions/workflows/node.js.yml/badge.svg)](https://github.com/bradoyler/route-cache/actions/workflows/node.js.yml)
 [![NPM Version][npm-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
 
@@ -110,3 +110,4 @@ SOFTWARE.
 [npm-image]: https://img.shields.io/npm/v/route-cache.svg
 [downloads-image]: http://img.shields.io/npm/dm/route-cache.svg
 [npm-url]: https://npmjs.org/package/route-cache
+[gha-workflow]: https://github.com/bradoyler/route-cache/actions/workflows/node.js.yml
