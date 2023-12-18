@@ -6,6 +6,7 @@ var request = require('supertest'),
 
 var hitIndex = 0;
 var noContentIndex = 0;
+var contentTypeIndex = 0;
 
 var app = express();
 var agent = request.agent(app);
@@ -41,6 +42,12 @@ describe('App-level cache:', function () {
   app.get('/test-api-204', function (req, res) {
     noContentIndex++;
     res.status(204).json();
+  });
+
+  app.get('/content-type', function (req, res) {
+    contentTypeIndex++;
+    res.set('Content-Type', 'application/xml');
+    res.send('<xml><node>This is some content</node></xml>')
   });
 
   it('1st res.send', function (done) {
@@ -135,6 +142,28 @@ describe('App-level cache:', function () {
       .get('/test-api-204')
       .expect(204, () => {
         assert.equal(noContentIndex, 2)
+        done()
+      })
+  })
+
+  it('1st content-type', function (done) {
+    agent
+      .get('/content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+        done()
+      })
+  })
+
+  it('2st content-type', function (done) {
+    agent
+      .get('/content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
         done()
       })
   })

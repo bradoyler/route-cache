@@ -13,6 +13,7 @@ describe('TTL:', function () {
   context('disabled (-1)', function () {
     var hitIndex = 0;
     var noContentIndex = 0;
+    var contentTypeIndex = 0;
 
     app.get('/cache-disabled', routeCache.cacheSeconds(-1), function (req, res) {
       hitIndex++;
@@ -23,6 +24,12 @@ describe('TTL:', function () {
       noContentIndex++;
       res.status(204).send();
     });
+
+    app.get('/cache-disabled-content-type', routeCache.cacheSeconds(-1), function (req, res) {
+      contentTypeIndex++
+      res.set('Content-Type', 'application/xml')
+      res.send('<xml><node>This is some content</node></xml>')
+    })
 
     it('Should get Hit #1', function (done) {
       agent
@@ -62,11 +69,36 @@ describe('TTL:', function () {
       });
     });
 
+    it('Should contentTypeIndex is 1', function (done) {
+      agent
+        .get('/cache-disabled-content-type')
+        .expect(200, (error, response) => {
+          assert.equal(contentTypeIndex, 1)
+          assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+          assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+          done()
+        })
+    });
+
+    it('Should contentTypeIndex is 2 (after nextTick)', function (done) {
+
+      process.nextTick(function () {
+        agent
+          .get('/cache-disabled-content-type')
+          .expect(200, (error, response) => {
+            assert.equal(contentTypeIndex, 2)
+            assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+            assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+            done()
+          })
+      });
+    });
   })
 
   context('zero', function () {
     var hitIndex = 0;
     var noContentIndex = 0;
+    var contentTypeIndex = 0;
 
     app.get('/cache-zero', routeCache.cacheSeconds(0), function (req, res) {
       hitIndex++;
@@ -77,6 +109,12 @@ describe('TTL:', function () {
       noContentIndex++;
       res.status(204).send();
     });
+
+    app.get('/cache-zero-content-type', routeCache.cacheSeconds(0), function (req, res) {
+      contentTypeIndex++
+      res.set('Content-Type', 'application/xml')
+      res.send('<xml><node>This is some content</node></xml>')
+    })
 
     it('Should get Hit #1', function (done) {
       agent
@@ -138,11 +176,48 @@ describe('TTL:', function () {
       }, 200);
     });
 
+    it('Should contentTypeIndex is 1', function (done) {
+      agent
+        .get('/cache-zero-content-type')
+        .expect(200, (error, response) => {
+          assert.equal(contentTypeIndex, 1)
+          assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+          assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+          done()
+        })
+    });
+
+    it('Should contentTypeIndex is 1 (after nextTick)', function (done) {
+      process.nextTick(function () {
+        agent
+          .get('/cache-zero-content-type')
+          .expect(200, (error, response) => {
+            assert.equal(contentTypeIndex, 1)
+            assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+            assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+            done()
+          })
+      });
+    });
+
+    it('Should contentTypeIndex is 2 (after 200ms delay)', function (done) {
+      setTimeout(function () {
+        agent
+          .get('/cache-zero-content-type')
+          .expect(200, (error, response) => {
+            assert.equal(contentTypeIndex, 2)
+            assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+            assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+            done()
+          })
+      }, 200);
+    });
   })
 
   context('1 second:', function () {
     var hitIndex = 0;
     var noContentIndex = 0;
+    var contentTypeIndex = 0;
 
     app.get('/cache-1s', routeCache.cacheSeconds(1), function (req, res) {
       hitIndex++;
@@ -153,6 +228,12 @@ describe('TTL:', function () {
       noContentIndex++;
       res.status(204).send();
     });
+
+    app.get('/cache-1s-content-type', routeCache.cacheSeconds(1), function (req, res) {
+      contentTypeIndex++
+      res.set('Content-Type', 'application/xml')
+      res.send('<xml><node>This is some content</node></xml>')
+    })
 
     it('Should get Hit #1', function (done) {
       agent
@@ -214,6 +295,41 @@ describe('TTL:', function () {
       }, 1300);
     });
 
-  });
+    it('Should contentTypeIndex is 1', function (done) {
+      agent
+        .get('/cache-1s-content-type')
+        .expect(200, (error, response) => {
+          assert.equal(contentTypeIndex, 1)
+          assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+          assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+          done()
+        })
+    });
 
+    it('Should contentTypeIndex is 1 (after 200ms delay)', function (done) {
+      setTimeout(function () {
+        agent
+          .get('/cache-1s-content-type')
+          .expect(200, (error, response) => {
+            assert.equal(contentTypeIndex, 1)
+            assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+            assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+            done()
+          })
+      }, 200);
+    });
+
+    it('Should contentTypeIndex is 2 (after 1200ms delay)', function (done) {
+      setTimeout(function () {
+        agent
+          .get('/cache-1s-content-type')
+          .expect(200, (error, response) => {
+            assert.equal(contentTypeIndex, 2)
+            assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+            assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+            done()
+          })
+      }, 1200);
+    });
+  });
 });
