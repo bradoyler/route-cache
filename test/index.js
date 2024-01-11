@@ -9,6 +9,7 @@ let testindex = 0
 let noContentIndex = 0
 let paramTestindex = 0
 let testindexRemove = 0
+let contentTypeIndex = 0
 
 describe('# RouteCache middleware test', function () {
   const app = express()
@@ -29,6 +30,12 @@ describe('# RouteCache middleware test', function () {
   app.get('/204', routeCache.cacheSeconds(10), function (req, res) {
     noContentIndex++
     res.status(204).send()
+  })
+
+  app.get('/content-type', routeCache.cacheSeconds(10), function (req, res) {
+    contentTypeIndex++
+    res.set('Content-Type', 'application/xml')
+    res.send('<xml><node>This is some content</node></xml>')
   })
 
   app.get('/500', routeCache.cacheSeconds(10), function (req, res) {
@@ -105,6 +112,28 @@ describe('# RouteCache middleware test', function () {
       .get('/204')
       .expect(204, () => {
         assert.equal(noContentIndex, 1)
+        done()
+      })
+  })
+
+  it('1st content-type', function (done) {
+    agent
+      .get('/content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+        done()
+      })
+  })
+
+  it('2st content-type', function (done) {
+    agent
+      .get('/content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
         done()
       })
   })

@@ -6,6 +6,7 @@ var request = require('supertest'),
 
 var paramTestIndex = 0
 var noContentIndex = 0
+var contentTypeIndex = 0
 
 describe('Params / Querystrings', function () {
   var app = express()
@@ -18,6 +19,12 @@ describe('Params / Querystrings', function () {
   app.get('/params-204', routeCache.cacheSeconds(10, '/params-test-204'), function (req, res) {
     noContentIndex++
     res.status(204).send()
+  })
+
+  app.get('/params-content-type', routeCache.cacheSeconds(10, '/params-test-content-type'), function (req, res) {
+    contentTypeIndex++
+    res.set('Content-Type', 'application/xml')
+    res.send('<xml><node>This is some content</node></xml>')
   })
 
   var agent = request.agent(app)
@@ -66,6 +73,39 @@ describe('Params / Querystrings', function () {
       .get('/params-204?a=2')
       .expect(204, () => {
         assert.equal(noContentIndex, 1)
+        done()
+      })
+  })
+
+  it('content-type without params', function (done) {
+    agent
+      .get('/params-content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+        done()
+      })
+  })
+
+  it('content-type with a=1', function (done) {
+    agent
+      .get('/params-content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
+        done()
+      })
+  })
+
+  it('content-type with a=2', function (done) {
+    agent
+      .get('/params-content-type')
+      .expect(200, (error, response) => {
+        assert.equal(contentTypeIndex, 1)
+        assert.equal(response.headers['content-type'], 'application/xml; charset=utf-8')
+        assert.equal(response.text, '<xml><node>This is some content</node></xml>')
         done()
       })
   })
