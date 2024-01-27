@@ -19,6 +19,10 @@ class LruStore {
   async del (key) {
     return Promise.resolve(this.lru.del(key))
   }
+
+  async clear () {
+    return Promise.resolve(this.lru.reset())
+  }
 }
 
 module.exports = LruStore

@@ -1,8 +1,7 @@
-/* globals decribe */
+/* globals describe */
 'use strict'
 const assert = require('assert')
 const LruStore = require('../lruStore')
-const LRU = require('lru-cache')
 
 describe('# LRU Store test', function() {
   const store = new LruStore({max: 1})
@@ -28,5 +27,19 @@ describe('# LRU Store test', function() {
     assert.equal(await store.get('foo'), 42)
     await store.del('foo')
     assert.equal(await store.get('foo'), undefined)
+  })
+
+  it('clears cache', async function() {
+    const store = new LruStore({max: 2})
+    await store.set('foo', 42)
+    await store.set('bar', 43)
+
+    assert.equal(await store.get('foo'), 42)
+    assert.equal(await store.get('bar'), 43)
+
+    await store.clear()
+
+    assert.equal(await store.get('foo'), undefined)
+    assert.equal(await store.get('bar'), undefined)
   })
 })
