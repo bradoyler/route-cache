@@ -102,7 +102,7 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
         }
 
         didHandle = true
-        const body = data instanceof Buffer ? data.toString() : data
+        const body = data
         if (res.statusCode < 400) cacheStore.set(key, { status: res.statusCode, body: body, isJson: isJson, contentType: res.getHeader('Content-Type') }, ttl)
 
         // send this response to everyone in the queue

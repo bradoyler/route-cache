@@ -26,6 +26,11 @@ class IoRedisStore {
     debug('del: ' + key)
     return this.client.del(key)
   }
+
+  async clear () {
+    debug('clear')
+    return this.client.flushdb()
+  }
 }
 
 module.exports = IoRedisStore

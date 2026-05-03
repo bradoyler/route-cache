@@ -76,7 +76,7 @@ const Redis = require('ioredis')
 const IoRedisStore = require('route-cache/ioRedisStore')
 
 
-const redisClient = new Redis(6379, '127.0.0.1'))
+const redisClient = new Redis(6379, '127.0.0.1')
 const cacheStore = new IoRedisStore(redisClient)
 routeCache.config({cacheStore})
 ```
