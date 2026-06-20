@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/bradoyler/route-cache.git"
+    "url": "git+https://github.com/bradoyler/route-cache.git"
   },
   "keywords": [
     "middleware",
