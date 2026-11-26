@@ -23,7 +23,7 @@ describe('# RouteCache middleware test', function () {
     res.send('Hello/1')
   })
 
-  app.get('/hello/:num([0-9])', routeCache.cacheSeconds(1), function (req, res) {
+  app.get('/hello/:num', routeCache.cacheSeconds(1), function (req, res) {
     res.send('Hello param:' + req.params.num)
   })
 

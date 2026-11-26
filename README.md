@@ -20,6 +20,8 @@ Blazing fast :bullettrain_side: Express middleware for route caching with a give
 npm install route-cache
 ```
 
+> **Note:** `route-cache@0.8.0+` supports both **Express 4** and **Express 5**.
+
 ## Test
 ```sh
 npm test
@@ -27,14 +29,17 @@ npm test
 
 ## How to use
 ```javascript
-var routeCache = require('route-cache');
+const express = require('express')
+const routeCache = require('route-cache')
+
+const app = express()
 
 // cache route for 20 seconds
-app.get('/index', routeCache.cacheSeconds(20), function(req, res){
+app.get('/index', routeCache.cacheSeconds(20), function (req, res) {
   // do your dirty work here...
-  console.log('you will only see this every 20 seconds.');
-  res.send('this response will be cached');
-});
+  console.log('you will only see this every 20 seconds.')
+  res.send('this response will be cached')
+})
 ```
 
 By default `req.originalUrl` is used as the cache key so every URL is cached separately.
@@ -65,9 +70,10 @@ routeCache.cacheSeconds(20, function(req, res) {
 })
 ```
 
-## Delete a cached route
+## Delete or clear cached routes
 ```javascript
-routeCache.removeCache('/index');
+await routeCache.removeCache('/index')
+await routeCache.clearCache()
 ```
 
 ## Use a distributed cache
