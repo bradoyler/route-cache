@@ -6,7 +6,7 @@ const queues = Object.create(null)
 const defaults = {
   max: 64 * 1000000, // ~64mb
   length: function (n, key) {
-    if (n.body && typeof n.body === 'string') {
+    if (n && n.body && typeof n.body === 'string') {
       return n.body.length
     }
     return 1
@@ -17,14 +17,15 @@ let cacheStore = new LruStore(defaults)
 
 module.exports.config = function (opts) {
   if (opts) {
+    const storeOpts = Object.assign({}, defaults)
     if (opts.max) {
-      defaults.max = opts.max
+      storeOpts.max = opts.max
     }
 
     if (opts.cacheStore) {
       cacheStore = opts.cacheStore
     } else {
-      cacheStore = new LruStore(defaults)
+      cacheStore = new LruStore(storeOpts)
     }
     module.exports.cacheStore = cacheStore
   }
@@ -32,89 +33,68 @@ module.exports.config = function (opts) {
 }
 
 function drainQueue (key) {
+  if (!queues[key]) return
   debug('drainQueue:', key)
-  let subscriber = null
-  while (queues[key] && queues[key].length > 0) {
-    subscriber = queues[key].shift()
+  const queue = queues[key]
+  delete queues[key]
+  while (queue.length > 0) {
+    const subscriber = queue.shift()
     process.nextTick(subscriber)
   }
-  delete queues[key]
+}
+
+function resolveCacheKey (req, res, cacheKey) {
+  if (typeof cacheKey === 'function') {
+    return cacheKey(req, res)
+  }
+  if (typeof cacheKey === 'string') {
+    return cacheKey
+  }
+  return req.originalUrl
+}
+
+async function tryServeFromCache (key, res, sendEmptyOnMiss) {
+  const redirectKey = await cacheStore.get('redirect:' + key)
+  if (redirectKey) {
+    res.redirect(redirectKey.status, redirectKey.url)
+    return true
+  }
+
+  const cachedValue = await cacheStore.get(key)
+  if (!cachedValue && !sendEmptyOnMiss) {
+    return false
+  }
+
+  const value = cachedValue || {}
+  debug(sendEmptyOnMiss ? '>> queued hit:' : 'hit!!', key)
+  if (value.contentType) res.set('Content-Type', value.contentType)
+  const status = value.status || 200
+  if (value.isJson) {
+    res.status(status).json(value.body)
+  } else {
+    res.status(status).send(value.body)
+  }
+  return true
 }
 
 module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
   const ttl = secondsTTL * 1000
   return function (req, res, next) {
-    let key = req.originalUrl // default cache key
-    if (typeof cacheKey === 'function') {
-      key = cacheKey(req, res) // dynamic key
-      // Allow skipping the cache
-      if (!key) { return next() }
-    } else if (typeof cacheKey === 'string') {
-      key = cacheKey // custom key
-    }
+    if (secondsTTL < 0) { return next() }
+    const key = resolveCacheKey(req, res, cacheKey)
+    // Allow skipping the cache
+    if (!key) { return next() }
 
-    cacheStore.get('redirect:' + key).then((redirectKey) => {
-      if (redirectKey) {
-        res.redirect(redirectKey.status, redirectKey.url)
-        return true
-      }
-      return false
-    }).then((handledByRedirect) => {
-      if (handledByRedirect) return true
-      return cacheStore.get(key).then((value) => {
-        if (value) {
-          // returns the value immediately
-          debug('hit!!', key)
-          if (value.contentType) res.set('Content-Type', value.contentType)
-          if (value.isJson) {
-            res.status(value.status).json(value.body)
-          } else {
-            res.status(value.status).send(value.body)
-          }
-          return true
-        }
-        return false
-      })
-    }).then((handledByCache) => {
-      if (handledByCache) return true
+    tryServeFromCache(key, res, false).then((handledByCache) => {
+      if (handledByCache) return
 
-      res.original_send = res.send
-      res.original_end = res.end
-      res.original_json = res.json
-      res.original_redirect = res.redirect
+      const originalSend = res.send
+      const originalEnd = res.end
+      const originalJson = res.json
+      const originalRedirect = res.redirect
 
       if (!queues[key]) {
         queues[key] = []
-      }
-
-      let didHandle = false
-
-      function rawSend (data, isJson) {
-        debug('rawSend', typeof data, data ? data.length : 0)
-        // pass-through for Buffer - not supported
-        if (typeof data === 'object') {
-          if (Buffer.isBuffer(data)) {
-            queues[key] = [] // clear queue
-            res.set('Content-Length', data.length)
-            res.original_send(data)
-            return
-          }
-        }
-
-        didHandle = true
-        const body = data
-        if (res.statusCode < 400) cacheStore.set(key, { status: res.statusCode, body: body, isJson: isJson, contentType: res.getHeader('Content-Type') }, ttl)
-
-        // send this response to everyone in the queue
-        drainQueue(key)
-
-        if (isJson) {
-          debug('res.original_json')
-          res.original_json(body)
-        } else {
-          debug('res.original_send')
-          res.original_send(body)
-        }
       }
 
       // first request will get rendered output
@@ -122,24 +102,63 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
         debug('miss:', key)
         queues[key].push(function noop () {})
 
-        didHandle = false
+        let didHandle = false
 
-        res.send = function (data) {
-          // debug('res.send() >>', data.length)
-          if (didHandle) {
-            res.original_send(data)
-          } else {
-            rawSend(data, false)
+        res.once('close', function () {
+          if (!didHandle) {
+            drainQueue(key)
           }
+        })
+
+        function rawSend (data, isJson) {
+          debug('rawSend', typeof data, data ? data.length : 0)
+          didHandle = true
+
+          // pass-through for Buffer - not supported
+          if (Buffer.isBuffer(data)) {
+            drainQueue(key)
+            res.set('Content-Length', data.length)
+            return originalSend.call(res, data)
+          }
+
+          if (res.statusCode < 400) {
+            Promise.resolve(cacheStore.set(key, {
+              status: res.statusCode,
+              body: data,
+              isJson,
+              contentType: res.getHeader('Content-Type')
+            }, ttl)).catch((err) => debug('cacheStore.set error:', err))
+          }
+
+          // send this response to everyone in the queue
+          drainQueue(key)
+
+          if (isJson) {
+            debug('res.original_json')
+            return originalJson.call(res, data)
+          }
+          debug('res.original_send')
+          return originalSend.call(res, data)
         }
 
-        res.end = (data) => {
-          res.original_end(data)
+        res.send = function (data) {
+          if (didHandle) {
+            return originalSend.call(res, data)
+          }
+          return rawSend(data, false)
+        }
+
+        res.end = function (...args) {
+          didHandle = true
           drainQueue(key)
+          return originalEnd.apply(res, args)
         }
 
         res.json = function (data) {
-          rawSend(data, true)
+          if (didHandle) {
+            return originalJson.call(res, data)
+          }
+          return rawSend(data, true)
         }
 
         // If response happens to be a redirect -- store it to redirect all subsequent requests.
@@ -153,14 +172,16 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
               status = arguments[0]
               address = arguments[1]
             } else {
-              console.log('res.redirect(url, status): Use res.redirect(status, url) instead')
+              debug('res.redirect(url, status): Use res.redirect(status, url) instead')
               status = arguments[1]
             }
           }
 
-          cacheStore.set('redirect:' + key, { url: address, status: status }, ttl)
-          res.original_redirect(status, address)
-          return drainQueue(key)
+          didHandle = true
+          Promise.resolve(cacheStore.set('redirect:' + key, { url: address, status }, ttl))
+            .catch((err) => debug('cacheStore.set error:', err))
+          drainQueue(key)
+          return originalRedirect.call(res, status, address)
         }
 
         next()
@@ -168,40 +189,22 @@ module.exports.cacheSeconds = function (secondsTTL, cacheKey) {
       } else {
         debug(key, '>> has queue.length:', queues[key].length)
         queues[key].push(function () {
-          cacheStore.get('redirect:' + key)
-            .then((redirectKey) => {
-              if (redirectKey) {
-                res.redirect(redirectKey.status, redirectKey.url)
-                return true
-              }
-              return false
-            })
-            .then((handledByRedirect) => {
-              if (handledByRedirect) return
-              return cacheStore.get(key).then((cachedValue) => {
-                const value = cachedValue || {}
-                debug('>> queued hit:', key, value.length)
-                if (value.contentType) res.set('Content-Type', value.contentType)
-                if (value.isJson) {
-                  res.status(value.status || 200).json(value.body)
-                } else {
-                  res.status(value.status || 200).send(value.body)
-                }
-              })
-            })
+          tryServeFromCache(key, res, true).catch(next)
         })
       }
-    })
+    }).catch(next)
   }
 }
 
 module.exports.removeCache = function (url) {
-  cacheStore.del('redirect:' + url)
-  cacheStore.del(url)
+  return Promise.all([
+    cacheStore.del('redirect:' + url),
+    cacheStore.del(url)
+  ])
 }
 
 module.exports.clearCache = function () {
-  cacheStore.clear()
+  return cacheStore.clear()
 }
 
 module.exports.cacheStore = cacheStore

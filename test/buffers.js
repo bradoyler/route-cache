@@ -12,17 +12,17 @@ app.use(routeCache.cacheSeconds(30));
 describe('Buffers', function () {
 
   app.get('/send-buffer', function (req, res) {
-    res.send(new Buffer('Test Buffer'));
+    res.send(Buffer.from('Test Buffer'));
   });
 
   app.get('/send-png', function (req, res) {
     res.type('png');
-    res.send(new Buffer('test PNG'));
+    res.send(Buffer.from('test PNG'));
   });
 
   app.get('/send-gif', function (req, res) {
     res.type('gif');
-    res.send(new Buffer('test GIF...'));
+    res.send(Buffer.from('test GIF...'));
   });
 
   // TEST -----------

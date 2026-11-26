@@ -21,7 +21,7 @@ describe('App-level cache:', function () {
 
   app.get('/send-buffer', function (req, res) {
     res.type('png');
-    res.send(new Buffer('test buffer'+hitIndex));
+    res.send(Buffer.from('test buffer'+hitIndex));
   });
 
   app.get('/send-test', function (req, res) {
